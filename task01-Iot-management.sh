@@ -32,4 +32,53 @@ then
 	exit 1
 fi
 
+echo "==========================="
+
+#prevent terminantion of critical processes
+
+ PROCESS_NAME=$(ps -p "$PID" -o comm=)
+
+if [ "$PID" -eq 1 ] || \
+	[ "$PROCESS_NAME" = "systemd" ] || \
+	[ "$PROCESS_NAME" = "init" ] || \
+	[ "$PROCESS_NAME" = "kthreadd" ]
+then
+	echo "WARNING: This is a critical system process."
+	echo "The process will Not be terminated."
+	exit 1
+fi
+
+echo "================================="
+
+#display selected process
+
+echo "Selected process: "
+ps -p "$PID" -o pid,user,%cpu,%mem,comm
+
+echo "====================="
+
+#ask confirmation
+
+echo ""
+read -p "Are you sure you want to terminate this process? (y/n): " CONFIRM
+
+
+#terminate process only after confirmation
+#--------------------------------
+
+if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "Y" ]
+
+then 
+	kill "$PID"
+	echo "Process $PID has been terminated."
+
+elif [ "$CONFIRM" = "n" ] || [ "$CONFIRM" = "N"]
+then
+	echo "Process termination cancelled."
+
+else
+	echo "Invalid! . Please enter y or n."
+fi
+
+echo " ==Done== "
 
