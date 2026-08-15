@@ -2,6 +2,21 @@
 
 #process monitoring and management tool
 
+LOG_FILE="system_monitor_log.txt"
+
+#record in log file
+
+log_action()
+{ echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE" }
+
+#cretate log file 
+if [ ! -f "$LOG_FILE" ]
+then
+	touch "$LOG_FILE"
+	log_action "System monitoring program started"
+
+fi
+
 #main menu
 while true
 do 
@@ -11,6 +26,8 @@ do
 	echo "2. Terminate Process"
 	echo "3. Check disk usage and Find large files than 50MB"
 	echo "4. Archive large log files and check Archive size"
+	echo "5. Exit"
+	echo "================================"
 
 
 	read -p "Enter your choice: " CHOICE
@@ -34,6 +51,7 @@ do
 		echo "==============================="
 
 		ps -eo pid,user,%cpu,%mem,comm --sort=%mem | head -n 11
+		log_action "checked cpu, memory usage and 10 memory concumin processes."
 
 	#select2
 	
@@ -52,7 +70,7 @@ do
 		if [ "$PID" = "1" ]
 		then 
 			echo "Error! PID 1 is critical system process."
-			echo "Termination is not aloowed."
+			echo "Termination is not alowed."
 			continue
 		fi
 
@@ -78,6 +96,7 @@ do
 		then 
 			kill "$PID"
 			echo " Process $PID has been terminated"
+			log_action "terminated process $PROCESS_NAME (PID $PID)"
 
 		else
 			echo "Process termination cancelled."
@@ -107,6 +126,8 @@ do
 		else
 			find "$LOG_DIR" -type f -name "*.log" -size +50M -exec ls -lh {} \;
 		fi
+
+		log_action "checked disk usage and larger log files in $LOG_DIR"
 
 	else
 		echo "Directory dose not exist."
@@ -148,6 +169,8 @@ do
 			echo "compressing large log files..."
 			tar -czf "$ARCHIVE_NAME" $LARGE_FILES
 
+			log_action "Archived large log files from $LOG_DIR into $ARCHIVE_NAME"
+
 			echo "Large log files have been archived."
 			echo "Archive files: "
 			echo "$ARCHIVE_NAME"
@@ -167,16 +190,42 @@ do
 		then 
 			echo "WARNING!"
 			echo "ArchiveLogs directory is larger than 1GB"
+
+			log_action "WARNING!: Archivelogs directory is larger than 1GB"
 		else
 			echo "Archive is in 1GB limit."
 		fi
 
+
+#select 5
+
+elif [ "$CHOICE" = "5" ]
+then
+	read -p "Are you sure you want to exit? (y/n): " EXIT_CONFIRM
+
+	if [ "$EXIT_CONFIRM" = "Y" ] || [ "$EXIT_CONFIRM" = "y" ]
+	then
+		echo "Bye! thank you using the system."
+		log_action "User exit from system"
+
+		break
+
+	else
+		echo "Exit cancelled."
+		log_action "User cancelled exit"
+
+	fi
+
 else
 	echo "Invalid choice."
 	echo "Please select 1, 2, 3, 4, or 5."
-fi
+
+	log_action "Invalid menu option selected: $CHOICE"
+	
+	fi
 
 done
+
 
 
 
