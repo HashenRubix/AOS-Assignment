@@ -83,7 +83,7 @@ do
 			echo "Process termination cancelled."
 		fi
 
-#select 
+#select3 
 	elif [ "$CHOICE" = "3" ]
 	then
 		read -p "Enter the sensor log directory path: " LOG_DIR
@@ -112,6 +112,73 @@ do
 		echo "Directory dose not exist."
 
 	fi
+
+#select 4
+	elif [ "$CHOICE" = "4" ]
+	then 
+		read -p "Enter the log directory path: " LOG_DIR
+
+		#check if directory exist
+		if [ ! -d "$LOG_DIR" ]
+		then
+			echo "Directory dose not exist"
+			continue
+		fi
+
+		#create archiveLogs directory
+		if [ ! -d "ArchiveLogs" ]
+		then
+			mkdir ArchiveLogs
+			echo "ArchiveLogs directory created."
+		fi
+
+		#find large log files
+		LARGE_FILES=$(find "$LOG_DIR" -type f -name "*.log" -size +50M)
+
+		if [ -z "$LARGE_FILES" ]
+		then
+			echo "No log file than 50MB found."
+		else
+			#create timestamp
+			TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+			#create archive file name
+			ARCHIVE_NAME="ArchiveLogs/Logs_$TIMESTAMP.tar.gz"
+
+			echo "compressing large log files..."
+			tar -czf "$ARCHIVE_NAME" $LARGE_FILES
+
+			echo "Large log files have been archived."
+			echo "Archive files: "
+			echo "$ARCHIVE_NAME"
+		fi
+
+		#check archive size
+		echo "ArchiveLogs Size"
+		echo "================"
+
+		du -sh ArchiveLogs
+
+		#archive logs size in bytes
+		SIZE=$(du -s -B1 ArchiveLogs | cit -f1)
+
+		#check if larger than 1GB
+		if [ "$SIZE" -gt 1073741824 ]
+		then 
+			echo "WARNING!"
+			echo "ArchiveLogs directory is larger than 1GB"
+		else
+			echo "Archive is in 1GB limit."
+		fi
+
+else
+	echo "Invalid choice."
+	echo "Please select 1, 2, 3, 4, or 5."
+fi
+
+done
+
+
 
 
 
