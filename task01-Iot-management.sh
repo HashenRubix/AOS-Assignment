@@ -183,7 +183,7 @@ do
 		du -sh ArchiveLogs
 
 		#archive logs size in bytes
-		SIZE=$(du -s -B1 ArchiveLogs | cit -f1)
+		SIZE=$(du -s -B1 ArchiveLogs | cut -f1)
 
 		#check if larger than 1GB
 		if [ "$SIZE" -gt 1073741824 ]
@@ -225,6 +225,7 @@ else
 	fi
 
 done
+#find some bugs and trying to fix
 
 
 
