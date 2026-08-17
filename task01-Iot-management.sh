@@ -1,232 +1,351 @@
-#! /bin/bash
+#!/bin/bash
 
-#process monitoring and management tool
+# Process Monitoring and Management Tool
 
 LOG_FILE="system_monitor_log.txt"
 
-#record in log file
-
+# Record actions in log file
 log_action()
-{ echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE" }
+{
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
 
-#cretate log file 
+# Create log file if it does not exist
 if [ ! -f "$LOG_FILE" ]
 then
-	touch "$LOG_FILE"
-	log_action "System monitoring program started"
-
+    touch "$LOG_FILE"
 fi
 
-#main menu
+# Record program start
+log_action "System monitoring program started"
+
+# Main menu
 while true
-do 
-	echo "Process and Log Magement System"
-	echo "==============================="
-	echo "1. Display Cpu/Memory Usage and top 10 meoru consume processes"
-	echo "2. Terminate Process"
-	echo "3. Check disk usage and Find large files than 50MB"
-	echo "4. Archive large log files and check Archive size"
-	echo "5. Exit"
-	echo "================================"
+do
+   
+    echo "=============================================="
+    echo "      PROCESS AND LOG MANAGEMENT SYSTEM"
+    echo "=============================================="
+    echo "1. Display CPU/Memory Usage and Top 10 Processes"
+    echo "2. Terminate Process"
+    echo "3. Check Disk Usage and Find Large Log Files"
+    echo "4. Archive Large Log Files and Check Archive Size"
+    echo "5. Exit"
+    echo "=============================================="
 
+    read -p "Enter your choice: " CHOICE
 
-	read -p "Enter your choice: " CHOICE
+    # ==========================================================
+    # CHOICE 1 - CPU AND MEMORY USAGE
+    # ==========================================================
 
-	#select1
-	if [ "$CHOICE" = "1" ]
-	then 
-		echo "Cpu and Memory usage"
-		echo "===================="
+    if [ "$CHOICE" = "1" ]
+    then
+       
+        echo "CPU and Memory Usage"
+        echo "===================="
 
-		#display cpu usage
-		echo "Cpu usage: "
-		top -bn1 | grep "Cpu(s)"
+        
+        echo "CPU Usage:"
+        top -bn1 | grep "Cpu(s)"
 
-		#display memory usage
-		echo "Memory usage: "
-		free -h
+        
+        echo "Memory Usage:"
+        free -h
 
-		#display top 10 memory usage process
-		echo "Top 10 memory consumin process"
-		echo "==============================="
+       
+        echo "Top 10 Memory Consuming Processes"
+        echo "================================="
 
-		ps -eo pid,user,%cpu,%mem,comm --sort=%mem | head -n 11
-		log_action "checked cpu, memory usage and 10 memory concumin processes."
+        ps -eo pid,user,%cpu,%mem,comm --sort=-%mem | head -n 11
 
-	#select2
-	
-	elif [ "$CHOICE" = "2" ]
-	then 
-		read -p "Enter the PID of the process: " PID
+        log_action "Checked CPU, memory usage and top 10 memory consuming processes."
 
-		#check if process exist
-		if ! ps -p "$PID" > /dev/null
-		then 
-			echo "Process with PID $PID dose not exist."
-			continue
-		fi
+    # ==========================================================
+    # CHOICE 2 - TERMINATE PROCESS
+    # ==========================================================
 
-		#prevent termination of pid 1
-		if [ "$PID" = "1" ]
-		then 
-			echo "Error! PID 1 is critical system process."
-			echo "Termination is not alowed."
-			continue
-		fi
+    elif [ "$CHOICE" = "2" ]
+    then
+        
+        read -p "Enter the PID of the process: " PID
 
-		#get process
-		PROCESS_NAME=$(ps -p "$PID" -o comm=)
+        # Check PID
+        if ! [[ "$PID" =~ ^[0-9]+$ ]]
+        then
+            echo "Invalid PID. Please enter a valid number."
+            log_action "Invalid PID entered: $PID"
+            continue
+        fi
 
-		#prevent termination of critical process
-		if [ "$PROCESS_NAME" = "systemd" ] || [ "$PROCESS_NAME" = "init" ]
-		then
-			echo "Error! : $PROCESS_NAME is a critical system process."
-			echo "Termination is not allowed"
-			continue
+        # Check whether process exists
+        if ! ps -p "$PID" > /dev/null 2>&1
+        then
+            echo "Process with PID $PID does not exist."
+            log_action "Attempted to terminate non-existent PID: $PID"
+            continue
+        fi
 
-		fi
+        # Prevent termination of PID 1
+        if [ "$PID" = "1" ]
+        then
+            echo "Error! PID 1 is a critical system process."
+            echo "Termination is not allowed."
+            log_action "Attempted to terminate critical PID 1"
+            continue
+        fi
 
-		#display process information
-		echo "Process information: "
-		ps -p "$PID" -o pid,user,%cpu,%mem,comm
+        # Get process name
+        PROCESS_NAME=$(ps -p "$PID" -o comm=)
 
-		#ask confimation
-		read -p "Are you sure you want terminate this process? (y/n): " CONFIRM
-		if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "Y" ]
-		then 
-			kill "$PID"
-			echo " Process $PID has been terminated"
-			log_action "terminated process $PROCESS_NAME (PID $PID)"
+        # Prevent termination of critical processes
+        if [ "$PROCESS_NAME" = "systemd" ] || [ "$PROCESS_NAME" = "init" ]
+        then
+            echo "Error! $PROCESS_NAME is a critical system process."
+            echo "Termination is not allowed."
+            log_action "Attempted to terminate critical process $PROCESS_NAME (PID $PID)"
+            continue
+        fi
 
-		else
-			echo "Process termination cancelled."
-		fi
+        # Display process information
+       
+        echo "Process Information"
+        echo "==================="
+        ps -p "$PID" -o pid,user,%cpu,%mem,comm
 
-#select3 
-	elif [ "$CHOICE" = "3" ]
-	then
-		read -p "Enter the sensor log directory path: " LOG_DIR
+        # Confirmation
+        
+        read -p "Are you sure you want to terminate this process? (y/n): " CONFIRM
 
-		#check directory
-		if [ -d "$LOG_DIR" ]
-		then
-			echo "========================"
-			echo "       DISK USAGE"
-			echo "========================"
+        if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "Y" ]
+        then
+            if kill "$PID" 2>/dev/null
+            then
+                echo "Process $PID has been terminated."
+                log_action "Terminated process $PROCESS_NAME (PID $PID)"
+            else
+                echo "Failed to terminate process $PID."
+                echo "You may need administrator privileges."
+                log_action "Failed to terminate process $PROCESS_NAME (PID $PID)"
+            fi
+        else
+            echo "Process termination cancelled."
+            log_action "Cancelled termination of process $PROCESS_NAME (PID $PID)"
+        fi
 
-			du -sh "$LOG_DIR"
+    # ==========================================================
+    # CHOICE 3 - DISK USAGE AND LARGE LOG FILES
+    # ==========================================================
 
-		#fin large log files
-		echo "LOG file larger than 50 MB"
+    elif [ "$CHOICE" = "3" ]
+    then
 
-		LARGE_FILES=$(find "$LOG_DIR" -type f -name "*.log" -size +50M)
-		if [ -z "$LARGE_FILES" ]
-		then
-			echo "No large files larger than 50MB found."
-		else
-			find "$LOG_DIR" -type f -name "*.log" -size +50M -exec ls -lh {} \;
-		fi
+        
+        echo "======================================"
+        echo "          DISK USAGE"
+        echo "======================================"
 
-		log_action "checked disk usage and larger log files in $LOG_DIR"
+        
+        echo "Directory:"
+        echo "$LOG_DIR"
 
-	else
-		echo "Directory dose not exist."
+        
+        echo "Total Directory Size:"
+        du -sh "$LOG_DIR"
 
-	fi
+        
+        echo "======================================"
+        echo "     LOG FILES LARGER THAN 50MB"
+        echo "======================================"
 
-#select 4
-	elif [ "$CHOICE" = "4" ]
-	then 
-		read -p "Enter the log directory path: " LOG_DIR
+        # Check whether large log files exist
+        LARGE_FILE_COUNT=$(find "$LOG_DIR" -type f -name "*.log" -size +50M -print | wc -l)
 
-		#check if directory exist
-		if [ ! -d "$LOG_DIR" ]
-		then
-			echo "Directory dose not exist"
-			continue
-		fi
+        if [ "$LARGE_FILE_COUNT" -eq 0 ]
+        then
+           
+            echo "No .log files larger than 50MB were found."
+        else
+            
+            echo "Found $LARGE_FILE_COUNT large log file(s):"
+            echo
 
-		#create archiveLogs directory
-		if [ ! -d "ArchiveLogs" ]
-		then
-			mkdir ArchiveLogs
-			echo "ArchiveLogs directory created."
-		fi
+            find "$LOG_DIR" -type f -name "*.log" -size +50M -exec ls -lh {} \;
+        fi
 
-		#find large log files
-		LARGE_FILES=$(find "$LOG_DIR" -type f -name "*.log" -size +50M)
+        log_action "Checked disk usage and large log files in $LOG_DIR"
 
-		if [ -z "$LARGE_FILES" ]
-		then
-			echo "No log file than 50MB found."
-		else
-			#create timestamp
-			TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+    # ==========================================================
+    # CHOICE 4 - ARCHIVE LARGE LOG FILES
+    # ==========================================================
 
-			#create archive file name
-			ARCHIVE_NAME="ArchiveLogs/Logs_$TIMESTAMP.tar.gz"
+    elif [ "$CHOICE" = "4" ]
+    then
+        
+        read -p "Enter the log directory path: " LOG_DIR
 
-			echo "compressing large log files..."
-			tar -czf "$ARCHIVE_NAME" $LARGE_FILES
+        # Remove accidental trailing slash
+        LOG_DIR="${LOG_DIR%/}"
 
-			log_action "Archived large log files from $LOG_DIR into $ARCHIVE_NAME"
+        # Check directory
+        if [ ! -d "$LOG_DIR" ]
+        then
+            
+            echo "ERROR: Directory does not exist."
+            echo "Path entered: $LOG_DIR"
 
-			echo "Large log files have been archived."
-			echo "Archive files: "
-			echo "$ARCHIVE_NAME"
-		fi
+            log_action "Attempted to archive files from non-existent directory: $LOG_DIR"
+            continue
+        fi
 
-		#check archive size
-		echo "ArchiveLogs Size"
-		echo "================"
+        # Create ArchiveLogs directory
+        ARCHIVE_DIR="ArchiveLogs"
 
-		du -sh ArchiveLogs
+        if [ ! -d "$ARCHIVE_DIR" ]
+        then
+            mkdir -p "$ARCHIVE_DIR"
 
-		#archive logs size in bytes
-		SIZE=$(du -s -B1 ArchiveLogs | cut -f1)
+            if [ $? -ne 0 ]
+            then
+                echo "ERROR: Could not create ArchiveLogs directory."
+                log_action "Failed to create ArchiveLogs directory"
+                continue
+            fi
 
-		#check if larger than 1GB
-		if [ "$SIZE" -gt 1073741824 ]
-		then 
-			echo "WARNING!"
-			echo "ArchiveLogs directory is larger than 1GB"
+            echo "ArchiveLogs directory created."
+            log_action "Created ArchiveLogs directory"
+        fi
 
-			log_action "WARNING!: Archivelogs directory is larger than 1GB"
-		else
-			echo "Archive is in 1GB limit."
-		fi
+        
+        echo "======================================"
+        echo "       SEARCHING LARGE LOG FILES"
+        echo "======================================"
 
+        # Count large log files
+        LARGE_FILE_COUNT=$(find "$LOG_DIR" -type f -name "*.log" -size +50M -print | wc -l)
 
-#select 5
+        if [ "$LARGE_FILE_COUNT" -eq 0 ]
+        then
+            
+            echo "No .log files larger than 50MB were found."
 
-elif [ "$CHOICE" = "5" ]
-then
-	read -p "Are you sure you want to exit? (y/n): " EXIT_CONFIRM
+            log_action "No large log files found in $LOG_DIR"
+        else
+            
+            echo "Found $LARGE_FILE_COUNT large log file(s)."
 
-	if [ "$EXIT_CONFIRM" = "Y" ] || [ "$EXIT_CONFIRM" = "y" ]
-	then
-		echo "Bye! thank you using the system."
-		log_action "User exit from system"
+            
+            echo "Files to be archived:"
+            echo "---------------------"
 
-		break
+            find "$LOG_DIR" -type f -name "*.log" -size +50M -exec ls -lh {} \;
 
-	else
-		echo "Exit cancelled."
-		log_action "User cancelled exit"
+            # Create timestamp
+            TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
-	fi
+            # Create archive name
+            ARCHIVE_NAME="$ARCHIVE_DIR/Logs_$TIMESTAMP.tar.gz"
 
-else
-	echo "Invalid choice."
-	echo "Please select 1, 2, 3, 4, or 5."
+           
+            echo "Creating archive..."
+            echo "Archive: $ARCHIVE_NAME"
 
-	log_action "Invalid menu option selected: $CHOICE"
-	
-	fi
+            # Create archive safely
+            find "$LOG_DIR" -type f -name "*.log" -size +50M -print0 | \
+                tar --null -czf "$ARCHIVE_NAME" --files-from=-
+
+            # Check whether tar was successful
+            if [ $? -eq 0 ]
+            then
+               
+                echo "======================================"
+                echo "       ARCHIVE CREATED SUCCESSFULLY"
+                echo "======================================"
+
+                
+                echo "Archive file:"
+                echo "$ARCHIVE_NAME"
+
+                
+                echo "Archive size:"
+                du -h "$ARCHIVE_NAME"
+
+                log_action "Archived large log files from $LOG_DIR into $ARCHIVE_NAME"
+            else
+                
+                echo "ERROR: Failed to create archive."
+
+                # Remove incomplete archive
+                rm -f "$ARCHIVE_NAME"
+
+                log_action "Failed to archive large log files from $LOG_DIR"
+            fi
+        fi
+
+        # ======================================================
+        # CHECK ARCHIVE DIRECTORY SIZE
+        # ======================================================
+
+        
+        echo "======================================"
+        echo "       ARCHIVELOGS DIRECTORY SIZE"
+        echo "======================================"
+
+        du -sh "$ARCHIVE_DIR"
+
+        # Get size in bytes
+        SIZE=$(du -s -B1 "$ARCHIVE_DIR" | cut -f1)
+
+        # Check whether size is greater than 1GB
+        if [ "$SIZE" -gt 1073741824 ]
+        then
+            echo
+            echo "WARNING!"
+            echo "ArchiveLogs directory is larger than 1GB."
+
+            log_action "WARNING: ArchiveLogs directory is larger than 1GB"
+        else
+            echo
+            echo "ArchiveLogs directory is within the 1GB limit."
+        fi
+
+    # ==========================================================
+    # CHOICE 5 - EXIT
+    # ==========================================================
+
+    elif [ "$CHOICE" = "5" ]
+    then
+       
+        read -p "Are you sure you want to exit? (y/n): " EXIT_CONFIRM
+
+        if [ "$EXIT_CONFIRM" = "Y" ] || [ "$EXIT_CONFIRM" = "y" ]
+        then
+           
+            echo "Bye! Thank you for using the system."
+
+            log_action "User exited from system"
+
+            break
+        else
+            
+            echo "Exit cancelled."
+
+            log_action "User cancelled exit"
+        fi
+
+    # ==========================================================
+    # INVALID CHOICE
+    # ==========================================================
+
+    else
+       
+        echo "Invalid choice."
+        echo "Please select 1, 2, 3, 4, or 5."
+
+        log_action "Invalid menu option selected: $CHOICE"
+    fi
 
 done
-#find some bugs and trying to fix
-
 
 
 

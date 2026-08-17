@@ -1,0 +1,12 @@
+2026-08-17 12:15:44 - System monitoring program started
+2026-08-17 12:15:49 - Checked CPU, memory usage and top 10 memory consuming processes.
+2026-08-17 12:16:05 - Cancelled termination of process blueman-applet (PID 2107)
+2026-08-17 12:16:33 - Attempted to check non-existent directory: dev/storge
+2026-08-17 12:16:44 - Attempted to archive files from non-existent directory: ygygy
+2026-08-17 12:16:48 - User exited from system
+2026-08-17 12:22:57 - System monitoring program started
+2026-08-17 12:23:02 - Checked CPU, memory usage and top 10 memory consuming processes.
+2026-08-17 12:23:14 - Cancelled termination of process mutter-x11-fram (PID 1988)
+2026-08-17 12:23:16 - Checked disk usage and large log files in 
+2026-08-17 12:23:34 - Attempted to archive files from non-existent directory: hdyhdh
+2026-08-17 12:23:41 - User exited from system
