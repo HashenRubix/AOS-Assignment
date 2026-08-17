@@ -10,3 +10,14 @@
 2026-08-17 12:23:16 - Checked disk usage and large log files in 
 2026-08-17 12:23:34 - Attempted to archive files from non-existent directory: hdyhdh
 2026-08-17 12:23:41 - User exited from system
+2026-08-17 15:08:09 - System monitoring program started
+2026-08-17 15:08:13 - Checked CPU, memory usage and top 10 memory consuming processes.
+2026-08-17 15:08:18 - Checked disk usage and large log files in 
+2026-08-17 15:08:36 - User exited from system
+2026-08-17 15:09:50 - System monitoring program started
+2026-08-17 15:09:54 - Checked disk usage and large log files in 
+2026-08-17 15:10:57 - User exited from system
+2026-08-17 15:11:46 - System monitoring program started
+2026-08-17 15:11:49 - Checked disk usage and large log files in 
+2026-08-17 15:12:36 - Attempted to archive files from non-existent directory: /dev/sda1
+2026-08-17 15:12:51 - User exited from system
