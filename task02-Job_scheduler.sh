@@ -215,7 +215,144 @@ do
 
         log_action "Job submitted - Student ID: $STUDENT_ID, Job: $JOB_NAME, Scheduling: Pending, Priority: $PRIORITY"
 
-### memo:-  start from choice 3
+
+    # CHOICE 3 - ROUND ROBIN SCHEDULING
+    # ======================================================
+
+    elif [ "$CHOICE" = "3" ]
+    then
+
+       
+        echo "=============================================="
+        echo "          ROUND ROBIN SCHEDULING"
+        echo "=============================================="
+        echo "Time Quantum: 5 seconds"
+        echo "=============================================="
+
+
+        # Check whether jobs exist
+
+        if [ ! -s "$QUEUE_FILE" ]
+        then
+            echo "No pending jobs to process."
+
+            log_action "Round Robin scheduling requested but queue was empty"
+
+            continue
+        fi
+
+
+        # Temporary file for Round Robin processing
+
+        TEMP_FILE="round_robin_queue.txt"
+	
+	 cp "$QUEUE_FILE" "$TEMP_FILE"
+
+
+        # Continue until temporary queue becomes empty
+
+        while [ -s "$TEMP_FILE" ]
+        do
+
+            NEW_QUEUE="round_robin_new.txt"
+
+            # Create empty new queue
+
+            > "$NEW_QUEUE"
+
+
+            # Read each job
+
+            while IFS='|' read -r STUDENT_ID JOB_NAME EXECUTION_TIME PRIORITY
+            do
+
+               
+                echo "----------------------------------------------"
+                echo "Student ID     : $STUDENT_ID"
+                echo "Job Name       : $JOB_NAME"
+                echo "Remaining Time : $EXECUTION_TIME seconds"
+                echo "Priority       : $PRIORITY"
+                echo "----------------------------------------------"
+
+		# If execution time is less than or equal to quantum
+
+                if [ "$EXECUTION_TIME" -le "$TIME_QUANTUM" ]
+                then
+
+                    echo "Executing for $EXECUTION_TIME seconds..."
+
+                    sleep "$EXECUTION_TIME"
+
+                    echo "Job completed."
+
+
+                    # Add completed job
+
+                    echo "$(date '+%Y-%m-%d %H:%M:%S')|$STUDENT_ID|$JOB_NAME|$EXECUTION_TIME|$PRIORITY|Round Robin|Completed" >> "$COMPLETED_FILE"
+
+
+                    # Log execution
+
+                    log_action "Executed job - Student ID: $STUDENT_ID, Job: $JOB_NAME, Scheduling: Round Robin, Execution Time: $EXECUTION_TIME seconds"
+
+
+                else
+			 # Execute only for 5 seconds
+
+                    echo "Executing for $TIME_QUANTUM seconds..."
+
+                    sleep "$TIME_QUANTUM"
+
+
+                    # Calculate remaining time
+
+                    REMAINING_TIME=$((EXECUTION_TIME - TIME_QUANTUM))
+
+
+                    echo "Time remaining: $REMAINING_TIME seconds"
+
+
+                    # Put job back into queue
+
+                    echo "$STUDENT_ID|$JOB_NAME|$REMAINING_TIME|$PRIORITY" >> "$NEW_QUEUE"
+
+
+                    # Log execution
+
+                    log_action "Executed 5-second time slice - Student ID: $STUDENT_ID, Job: $JOB_NAME, Scheduling: Round Robin, Remaining Time: $REMAINING_TIME seconds"
+
+                fi
+
+            done < "$TEMP_FILE"
+
+	     # Replace old temporary queue
+
+            mv "$NEW_QUEUE" "$TEMP_FILE"
+
+        done
+
+
+        # Remove temporary file
+
+        rm -f "$TEMP_FILE"
+
+
+        # Clear pending queue
+
+        > "$QUEUE_FILE"
+
+
+
+        echo "=============================================="
+        echo "   ROUND ROBIN PROCESSING COMPLETED"
+        echo "=============================================="
+
+
+        log_action "Round Robin scheduling completed"
+
+
+
+
        
 
 
