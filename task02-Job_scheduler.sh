@@ -351,6 +351,101 @@ do
         log_action "Round Robin scheduling completed"
 
 
+    # CHOICE 4 - PRIORITY SCHEDULING
+    # ======================================================
+
+    elif [ "$CHOICE" = "4" ]
+    then
+
+
+        echo "=============================================="
+        echo "           PRIORITY SCHEDULING"
+        echo "=============================================="
+        echo "Priority 1 = Highest"
+        echo "Priority 10 = Lowest"
+        echo "=============================================="
+
+
+        # Check whether jobs exist
+
+        if [ ! -s "$QUEUE_FILE" ]
+        then
+            echo "No pending jobs to process."
+
+            log_action "Priority scheduling requested but queue was empty"
+
+            continue
+        fi
+
+
+        # Temporary sorted queue
+
+        SORTED_FILE="priority_queue.txt"
+
+	# Sort jobs by priority
+        # Priority 1 will come before Priority 2, etc.
+
+        sort -t'|' -k4,4n "$QUEUE_FILE" > "$SORTED_FILE"
+
+
+        echo
+        echo "Jobs will be processed according to priority."
+        echo
+
+
+        # Read sorted jobs
+
+        while IFS='|' read -r STUDENT_ID JOB_NAME EXECUTION_TIME PRIORITY
+        do
+
+            echo "----------------------------------------------"
+            echo "Student ID     : $STUDENT_ID"
+            echo "Job Name       : $JOB_NAME"
+            echo "Execution Time : $EXECUTION_TIME seconds"
+            echo "Priority       : $PRIORITY"
+            echo "----------------------------------------------"
+
+
+            echo "Executing job..."
+
+            sleep "$EXECUTION_TIME"
+
+
+            echo "Job completed."
+
+	    # Store completed job
+
+            echo "$(date '+%Y-%m-%d %H:%M:%S')|$STUDENT_ID|$JOB_NAME|$EXECUTION_TIME|$PRIORITY|Priority|Completed" >> "$COMPLETED_FILE"
+
+
+            # Log execution
+
+            log_action "Executed job - Student ID: $STUDENT_ID, Job: $JOB_NAME, Scheduling: Priority, Priority: $PRIORITY, Execution Time: $EXECUTION_TIME seconds"
+
+
+        done < "$SORTED_FILE"
+
+
+        # Remove temporary sorted file
+
+        rm -f "$SORTED_FILE"
+
+
+        # Clear pending queue
+
+        > "$QUEUE_FILE"
+
+
+
+        echo "=============================================="
+        echo "    PRIORITY PROCESSING COMPLETED"
+        echo "=============================================="
+
+
+        log_action "Priority scheduling completed"
+
+
+
 
 
        
