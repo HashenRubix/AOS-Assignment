@@ -446,6 +446,105 @@ do
 
 
 
+    # CHOICE 5 - VIEW COMPLETED JOBS
+    # ======================================================
+
+    elif [ "$CHOICE" = "5" ]
+    then
+
+        echo
+        echo "=============================================="
+        echo "             COMPLETED JOBS"
+        echo "=============================================="
+
+
+        # Check completed jobs
+
+        if [ ! -s "$COMPLETED_FILE" ]
+        then
+            echo "No completed jobs."
+        else
+
+            printf "%-20s %-15s %-25s %-12s %-10s %-15s\n" \
+            "Date/Time" "Student ID" "Job Name" "Time" "Priority" "Scheduling"
+
+            echo "---------------------------------------------------------------"
+
+	    # Read completed jobs
+
+            while IFS='|' read -r DATE_TIME STUDENT_ID JOB_NAME EXECUTION_TIME PRIORITY SCHEDULING STATUS
+            do
+
+                printf "%-20s %-15s %-25s %-12s %-10s %-15s\n" \
+                "$DATE_TIME" \
+                "$STUDENT_ID" \
+                "$JOB_NAME" \
+                "$EXECUTION_TIME" \
+                "$PRIORITY" \
+                "$SCHEDULING"
+
+            done < "$COMPLETED_FILE"
+
+        fi
+
+
+        echo
+
+        log_action "Viewed completed jobs"
+
+
+
+	 # CHOICE 6 - EXIT SYSTEM
+    # ======================================================
+
+    elif [ "$CHOICE" = "6" ]
+    then
+
+        echo
+        read -p "Are you sure you want to exit? (y/n): " EXIT_CONFIRM
+
+
+        if [ "$EXIT_CONFIRM" = "Y" ] || [ "$EXIT_CONFIRM" = "y" ]
+        then
+
+
+            echo "=============================================="
+            echo " Bye! Thank you for using the system."
+            echo "=============================================="
+
+
+            log_action "User exited from University Research Cluster Job Scheduler"
+
+            break
+
+        else
+
+            echo "Exit cancelled."
+
+            log_action "User cancelled system exit"
+
+        fi
+
+
+	# INVALID CHOICE
+    # ======================================================
+
+    else
+
+
+        echo "Invalid choice."
+        echo "Please select 1, 2, 3, 4, 5, or 6."
+
+        log_action "Invalid menu option selected: $CHOICE"
+
+    fi
+
+done 
+
+
+
+
+
 
 
        
