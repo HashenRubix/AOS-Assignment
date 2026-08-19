@@ -1,0 +1,8 @@
+2026-08-19 23:28:19 - University Research Cluster Job Scheduler started
+2026-08-19 23:28:22 - Viewed pending jobs
+2026-08-19 23:29:07 - Job submitted - Student ID: 123@abc, Job: hashen, Scheduling: Pending, Priority: 5
+2026-08-19 23:29:22 - Executed job - Student ID: 123@abc, Job: hashen, Scheduling: Round Robin, Execution Time: 3 seconds
+2026-08-19 23:29:22 - Round Robin scheduling completed
+2026-08-19 23:29:25 - Priority scheduling requested but queue was empty
+2026-08-19 23:29:29 - Viewed completed jobs
+2026-08-19 23:29:35 - User exited from University Research Cluster Job Scheduler
