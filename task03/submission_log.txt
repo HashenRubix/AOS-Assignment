@@ -1,0 +1,9 @@
+2026-08-24 02:11:55 - Final Year Project Submission System started
+2026-08-24 02:12:34 - Submission failed - File does not exist: Desktop/Aos-Assignment
+2026-08-24 02:13:35 - Check submission failed - File does not exist: /home/rubix/Documents/AOS_B5
+2026-08-24 02:13:55 - Submission failed - File does not exist: /home/rubix/Documents/AOS_B5
+2026-08-24 02:15:28 - Rejected invalid file type: python.txt
+2026-08-24 02:15:51 - Checked file - No duplicate found: python.txt
+2026-08-24 02:15:59 - Listed all submitted assignments
+2026-08-24 02:16:08 - Authentication failed
+2026-08-24 02:16:43 - User exited from Final Year Project Submission System
