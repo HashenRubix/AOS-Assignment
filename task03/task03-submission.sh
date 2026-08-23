@@ -201,6 +201,258 @@ do
         STORED_FILE="${STUDENT_ID}_${TIMESTAMP}_${FILE_NAME}"
 
 
+	# COPY FILE TO SUBMISSION DIRECTORY
+        # ---------------------------------
+
+        if cp "$FILE_PATH" "$SUBMISSION_DIR/$STORED_FILE"
+        then
+
+
+            echo " SUBMISSION SUCCESSFUL"
+            echo "======================================"
+
+            echo "Student ID : $STUDENT_ID"
+            echo "File Name  : $FILE_NAME"
+            echo "File Size  : $(du -h "$FILE_PATH" | cut -f1)"
+            echo "Stored As  : $STORED_FILE"
+
+
+            # WRITE SUBMISSION LOG
+            # ---------------------
+
+            echo "$(date '+%Y-%m-%d %H:%M:%S')|$STUDENT_ID|$FILE_NAME|$FILE_HASH|SUBMITTED" \
+                >> "$SUBMISSION_LOG"
+
+            log_action "Assignment submitted successfully - Student: $STUDENT_ID - File: $FILE_NAME"
+
+        else
+
+            echo "ERROR: Failed to copy submission."
+
+            log_action "Submission failed while copying file: $FILE_NAME"
+
+        fi
+
+	# CHOICE 2 - CHECK DUPLICATE FILE
+        # ===============================
+
+    elif [ "$CHOICE" = "2" ]
+    then
+
+
+        echo " CHECK SUBMISSION"
+        echo "======================================"
+
+        read -p "Enter file path: " FILE_PATH
+
+        if [ ! -f "$FILE_PATH" ]
+        then
+
+            echo "ERROR: File does not exist."
+
+            log_action "Check submission failed - File does not exist: $FILE_PATH"
+
+            continue
+
+        fi
+
+        FILE_NAME=$(basename "$FILE_PATH")
+
+        FILE_HASH=$(sha256sum "$FILE_PATH" | awk '{print $1}')
+
+        FOUND="false"
+
+
+	# SEARCH SUBMISSION LOG
+        # ----------------------
+
+        if [ -s "$SUBMISSION_LOG" ]
+        then
+
+            while IFS='|' read -r LOG_TIME LOG_STUDENT LOG_FILE LOG_HASH LOG_STATUS
+            do
+
+                if [ "$LOG_FILE" = "$FILE_NAME" ] &&
+                   [ "$LOG_HASH" = "$FILE_HASH" ] &&
+                   [ "$LOG_STATUS" = "SUBMITTED" ]
+                then
+
+                    FOUND="true"
+
+                    echo "======================================"
+                    echo " FILE ALREADY SUBMITTED"
+                    echo "======================================"
+
+                    echo "Filename : $LOG_FILE"
+                    echo "Student  : $LOG_STUDENT"
+                    echo "Date     : $LOG_TIME"
+
+                    break
+
+                fi
+
+            done < "$SUBMISSION_LOG"
+	fi
+
+	if [ "$FOUND" = "false" ]
+        then
+
+            echo "File has not been submitted before."
+
+            log_action "Checked file - No duplicate found: $FILE_NAME"
+
+        else
+
+            log_action "Checked file - Existing submission found: $FILE_NAME"
+
+        fi
+
+
+
+
+	# CHOICE 3 - LIST ALL SUBMITTED ASSIGNMENTS
+        # =========================================
+
+    elif [ "$CHOICE" = "3" ]
+    then
+
+
+        echo " ALL SUBMITTED ASSIGNMENTS"
+        echo "======================================"
+
+        if [ ! -s "$SUBMISSION_LOG" ]
+        then
+
+            echo "No assignments have been submitted."
+
+        else
+
+            echo "Date and Time | Student ID | File Name"
+            echo "--------------------------------------"
+
+            while IFS='|' read -r LOG_TIME LOG_STUDENT LOG_FILE LOG_HASH LOG_STATUS
+            do
+
+                if [ "$LOG_STATUS" = "SUBMITTED" ]
+                then
+
+                    echo "$LOG_TIME | $LOG_STUDENT | $LOG_FILE"
+
+                fi
+
+            done < "$SUBMISSION_LOG"
+	fi
+
+	 echo "======================================"
+
+        log_action "Listed all submitted assignments"
+
+
+
+    # CHOICE 4 - SIMULATE LOGIN ATTEMPT
+    # =================================
+
+    elif [ "$CHOICE" = "4" ]
+    then
+
+
+        echo " LOGIN AUTHENTICATION"
+        echo "======================================"
+
+        
+        # CALL PYTHON AUTHENTICATION SCRIPT
+        # ---------------------------------
+	
+	if [ ! -f "task-03Auth.py" ]
+        then
+
+            echo "ERROR: task-03Auth.py was not found."
+
+            echo "Please place task-03Auth.py in the same directory."
+
+            log_action "Authentication failed - task-03Auth.py not found"
+
+            continue
+
+        fi
+
+
+        python3 task-03Auth.py login
+
+        AUTH_RESULT=$?
+
+
+
+	 # CHECK AUTHENTICATION RESULT
+         # ---------------------------
+
+        if [ "$AUTH_RESULT" -eq 0 ]
+        then
+
+            echo "Authentication completed successfully."
+
+            log_action "Successful authentication through Python authentication system"
+
+        elif [ "$AUTH_RESULT" -eq 2 ]
+        then
+
+            echo "Authentication blocked - account is locked."
+
+            log_action "Authentication blocked - locked account"
+
+        else
+
+            echo "Authentication failed."
+
+            log_action "Authentication failed"
+
+        fi
+
+	# CHOICE 5 - EXIT
+        # ================
+
+    elif [ "$CHOICE" = "5" ]
+    then
+
+        read -p "Are you sure you want to exit? (y/n): " EXIT_CONFIRM
+
+
+        if [ "$EXIT_CONFIRM" = "Y" ] || [ "$EXIT_CONFIRM" = "y" ]
+        then
+
+            echo "Bye! Thank you for using the Final Year Project Submission System."
+
+            log_action "User exited from Final Year Project Submission System"
+
+            break
+
+        else
+
+            echo "Exit cancelled."
+
+            log_action "User cancelled exit"
+
+        fi
+
+	# INVALID CHOICE
+        # ================
+
+    else
+
+        echo "Invalid choice."
+
+        echo "Please select 1, 2, 3, 4, or 5."
+
+        log_action "Invalid menu option selected: $CHOICE"
+
+    fi
+
+done
+
+
+
+
+
 
 
 
