@@ -105,14 +105,14 @@ def simulate_login(username, password):
     # ------------------------------------------------------
 
     if username not in accounts_status:
+    accounts_status[username] = {
+        "failed_attempts": 0,
+        "locked": False,
+        "last_attempt_time": None
+    }
 
-        accounts_status[username] = {
-            "failed_attempts": 0,
-            "locked": False,
-            "last_attempt_time": None
-        }
-
-        account = accounts_status[username]
+# Move this line outside the if block so it always executes
+account = accounts_status[username] 
 
 
 
@@ -259,25 +259,26 @@ if __name__ == "__main__":
 
 
     # Check whether username and password were entered
+    if __name__ == "__main__":
     if len(sys.argv) != 3:
-
-        print(
-            "Usage: python3 task3_auth.py "
-            "<username> <password>"
-        )
-
+        print("Usage: python3 task-03Auth.py <username> <password>")
         sys.exit(1)
 
-
-    # Get username and password
     entered_username = sys.argv[1]
     entered_password = sys.argv[2]
 
-    # Run login function
-    result = simulate_login(
-        entered_username,
-        entered_password
-    )
+    result = simulate_login(entered_username, entered_password)
+
+    # Display result
+    print(result)
+
+    # Set exit codes based on authentication result
+    if "SUCCESSFUL" in result:
+        sys.exit(0)  # Success
+    elif "LOCKED" in result:
+        sys.exit(2)  # Account locked
+    else:
+        sys.exit(1)  # Authentication failed
 
 
     # Display result
