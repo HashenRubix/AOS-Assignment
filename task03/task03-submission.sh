@@ -350,63 +350,50 @@ do
 
 
     # CHOICE 4 - SIMULATE LOGIN ATTEMPT
-    # =================================
+    # =================================    
 
-    elif [ "$CHOICE" = "4" ]
+elif [ "$CHOICE" = "4" ]
+then
+
+    echo "======================================"
+    echo " LOGIN AUTHENTICATION"
+    echo "======================================"
+
+    # Check if Python authentication script exists
+    if [ ! -f "task-03Auth.py" ]
     then
+        echo "ERROR: task-03Auth.py was not found."
+        echo "Please place task-03Auth.py in the same directory."
+        log_action "Authentication failed - task-03Auth.py not found"
+        continue
+    fi
+
+    # Get username and password from user
+    read -p "Enter username: " USERNAME
+    read -s -p "Enter password: " PASSWORD
+    echo ""  # Add newline after hidden password input
+
+    # Call Python authentication script with username and password
+    python3 task-03Auth.py "$USERNAME" "$PASSWORD"
+    AUTH_RESULT=$?
+
+    # Check authentication result
+    if [ "$AUTH_RESULT" -eq 0 ]
+    then
+        echo "Authentication completed successfully."
+        log_action "Successful authentication through Python authentication system"
+    elif [ "$AUTH_RESULT" -eq 2 ]
+    then
+        echo "Authentication blocked - account is locked."
+        log_action "Authentication blocked - locked account"
+    else
+        echo "Authentication failed."
+        log_action "Authentication failed"
+    fi
 
 
-        echo " LOGIN AUTHENTICATION"
-        echo "======================================"
-
-        
-        # CALL PYTHON AUTHENTICATION SCRIPT
-        # ---------------------------------
-	
-	if [ ! -f "task-03Auth.py" ]
-        then
-
-            echo "ERROR: task-03Auth.py was not found."
-
-            echo "Please place task-03Auth.py in the same directory."
-
-            log_action "Authentication failed - task-03Auth.py not found"
-
-            continue
-
-        fi
 
 
-        python3 task-03Auth.py login
-
-        AUTH_RESULT=$?
-
-
-
-	 # CHECK AUTHENTICATION RESULT
-         # ---------------------------
-
-        if [ "$AUTH_RESULT" -eq 0 ]
-        then
-
-            echo "Authentication completed successfully."
-
-            log_action "Successful authentication through Python authentication system"
-
-        elif [ "$AUTH_RESULT" -eq 2 ]
-        then
-
-            echo "Authentication blocked - account is locked."
-
-            log_action "Authentication blocked - locked account"
-
-        else
-
-            echo "Authentication failed."
-
-            log_action "Authentication failed"
-
-        fi
 
 	# CHOICE 5 - EXIT
         # ================

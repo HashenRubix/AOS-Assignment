@@ -7,3 +7,16 @@
 2026-08-24 02:15:59 - Listed all submitted assignments
 2026-08-24 02:16:08 - Authentication failed
 2026-08-24 02:16:43 - User exited from Final Year Project Submission System
+2026-08-25 11:56:51 - Final Year Project Submission System started
+2026-08-25 11:59:26 - Submission failed - File does not exist: home/syslab/assesment.pdf
+2026-08-25 12:00:25 - Submission failed - File does not exist: /home/rubix/syslab/assesment.pfd
+2026-08-25 12:00:36 - Check submission failed - File does not exist: /home/rubix/syslab
+2026-08-25 12:00:42 - Listed all submitted assignments
+2026-08-25 12:00:47 - Authentication failed
+2026-08-25 12:01:04 - User exited from Final Year Project Submission System
+2026-08-26 01:06:01 - Final Year Project Submission System started
+2026-08-26 01:06:44 - Submission failed - File does not exist: /Desktop/AOS-Assignment
+2026-08-26 01:07:02 - Check submission failed - File does not exist: /Desktop/AOS-Assignment
+2026-08-26 01:07:10 - Listed all submitted assignments
+2026-08-26 01:07:14 - Authentication failed
+2026-08-26 01:07:40 - User exited from Final Year Project Submission System
